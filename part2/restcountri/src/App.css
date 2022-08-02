@@ -1,0 +1,77 @@
+.App {
+  text-align: center;
+}
+
+body{
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+.App {
+  background:linear-gradient(to top, #2e3638, #2b0526);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: bold;
+  font-family: 'Roboto', sans-serif;
+  color: rgb(242, 239, 237);
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgb(239, 162, 29);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+}
+.search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgb(176, 184, 179);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  border:none;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+}
+.card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding-right: 50px;
+
+}
+.btn{
+  background: rgb(239, 162, 29);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  border:none;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+}
+.btn:hover{
+  background: rgb(242, 239, 237);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  border:none;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+  transition: 0.5s;
+}
