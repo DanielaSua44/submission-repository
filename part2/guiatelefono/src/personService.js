@@ -8,13 +8,14 @@ const getAll = () => {
     }
     );
 }
-const create = (person) => {
-    const request = axios.post(url, person);
-    return request.then(response => {
-        return response.data;
-    }
-    );
-    }
+const create = async(person) => {
+    const request = await(axios.post(url, person));
+    const response = await request;
+    return response.data;
+    
+    
+}
+   
 const update = (id, person) => {
     const request = axios.put(`${url}/${id}`, person);
     return request.then(response => {

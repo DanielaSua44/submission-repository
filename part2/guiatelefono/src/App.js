@@ -44,6 +44,12 @@ function App() {
       setPersons(persons.concat(savedPerson))
       notify(`Added ${savedPerson.name}`)
     })
+    .catch(error => {
+      notify(
+        `the person '${personObject.name}' was had already been from the server`, 'alert'
+      )
+    })
+  
    
   }
 
@@ -68,7 +74,7 @@ function App() {
     if(window.confirm(`Delete ${persons.find(person=>person.id===id).name}?`)){
       personService.deletePerson(id).then(()=>{
         setPersons(persons.filter(person=>person.id!==id))
-        setNotification(`${persons.find(person=>person.id===id).name} was deleted from server`)
+        notify(`Deleted ${persons.find(person=>person.id===id).name}`)
         setTimeout(() => {
           setNotification(null)
         }, 5000)
@@ -148,19 +154,19 @@ const Filter=({searchName,filter})=>{
 const Notification = ({ notification }) => {
   if(notification === null){
     return null
-  }else if(notification.includes('was already deleted from server'|| 'was added to phonebook')){
-    return(
-      <div className="alert alert-success" role="alert">
-        {notification}
-      </div>
-    )
-  }else{
-    return(
-      <div className="alert alert-danger" role="alert">
-        {notification}
-      </div>
-    )
   }
+  const style = {
+    color: notification.type === 'alert' ? 'red' : 'green',
+    background: 'lightgrey',
+    border: notification.type === 'alert' ? '1px solid green' : '1px solid red',
+    padding: 10,
+    marginBottom: 10
+  }
+  return (
+    <div style={style}>
+      {notification.message}
+    </div>
+  )
 }
 
 
