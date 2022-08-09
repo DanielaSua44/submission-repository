@@ -9,36 +9,53 @@ function App() {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
-  const [errorMessage, setErrorMessage] = useState('')
-  const [exitMessage, setExitMessage] = useState(null)
+  const [notification, setNotification] = useState(null)
 
  
   const addName = (e) => {
     e.preventDefault()
-    if (persons.find(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
-      setNewName("");
-      setNewNumber("");
+    const personObject = {
+      name: newName,
+      number: newNumber,
     }
-    else {
-      const personObject = {
-        name: newName,
-        number: newNumber,
+    setNewName('')
+    setNewNumber('')
+    const existingPerson = persons.find(p => p.name === personObject.name)
+    if ( existingPerson ) {
+      const ok = window.confirm(`${existingPerson.name} is already added to phonebook, update the number?`)
+      if ( ok ) {
+
+        personService.update(existingPerson.id, {...existingPerson, number: newNumber }).then(savedPerson => {
+          setPersons(persons.map(p => p.id === existingPerson.id ? savedPerson : p ))
+          notify(`Updated info of ${savedPerson.name}`)
+        })
+        .catch(error => {
+          notify(
+            `the person '${existingPerson.name}' was had already been from the server`, 'alert'
+          )
+          setPersons(persons.filter(p => p.id !== existingPerson.id))
+        })
+
+        return 
       }
-      personService.create(personObject).then(returnedPerson => {
-        setPersons(...persons, returnedPerson)
-        setNewName("");
-        setNewNumber("");
-        setExitMessage(`${newName} was added to phonebook`)
-      }
-      ).catch(error =>{
-        setErrorMessage(`${newName} was already deleted from server`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
     }
+
+    personService.create(personObject).then(savedPerson => {
+      setPersons(persons.concat(savedPerson))
+      notify(`Added ${savedPerson.name}`)
+    })
+   
   }
+
+  console.log(persons)
+    const notify = (message, type='info') => {
+    setNotification({ message, type })
+    setTimeout(() => {
+      setNotification(null)
+    }, 3000)
+  }
+
+
   useEffect(() => {
     personService.getAll().then(initialPersons => {
       setPersons(initialPersons)
@@ -51,77 +68,46 @@ function App() {
     if(window.confirm(`Delete ${persons.find(person=>person.id===id).name}?`)){
       personService.deletePerson(id).then(()=>{
         setPersons(persons.filter(person=>person.id!==id))
-        setExitMessage(`${persons.find(person=>person.id===id).name} was deleted from server`)
+        setNotification(`${persons.find(person=>person.id===id).name} was deleted from server`)
         setTimeout(() => {
-          setErrorMessage(null)
+          setNotification(null)
         }, 5000)
       }
       ).catch(error=>{
-        setErrorMessage(error.message)
+        setNotification(error.message)
         setTimeout(() => {
-          setErrorMessage(null)
+          setNotification(null)
         }, 5000)
       }
       )
     }
     
   }
-  const handleNameChange=(e)=>{
-    setNewName(e.target.value)
-  }
-  const handleNumberChange=(e)=>{
-    setNewNumber(e.target.value)
-  }
+
   
-  const  updateNumber=(id,number)=>{
-    const person=persons.find(person=>person.id===id)
-    const changedPerson={...person,number}
-    if(window.confirm(`${person.name} is already added to phonebook, replace the old number with new number?`)){
-      personService.update(id,changedPerson).then(returnedPerson=>{
-        setPersons(persons.map(person=>person.id!==id?person:returnedPerson))
-        setExitMessage(`${person.name}'s number was updated`)
-      }
-      ).catch(error=>{
-        setErrorMessage(`${person.name} was already deleted from server`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      }
-      )
-    }
-  }
+ const personsToShow = (filter.length === 0) ? persons :
+    persons.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
 
-  const searchName=(e)=>{
-    e.preventDefault()
-    const filtered = persons.filter(person=>person.name.toLowerCase().includes(e.target.value.toLowerCase()))
-    setFilter(e.target.value)
-    setPersons(filtered)
-  }
 
-  const rows=persons?.map(person=>{
-      return <Persons key={person.id} person={person} 
-      handleDelete={()=>handleDelete(person.id)}
-      updateNumber={()=>updateNumber(person.id,newNumber)}
-      />
-    }
-    )
+
+
 
     
   return (
     <div className="App">
       <h2 className="display-2">Phonebook</h2>
-      <Filter searchName={searchName} filter= {filter}/>
-      <Notification message={errorMessage || exitMessage} />
+      <Filter searchName={({target}) =>setFilter(target.value)} filter= {filter}/>
+      <Notification notification={notification} />
       <form onSubmit={addName}>
         <div>
         <h2 className="display-3">add a new</h2>
           name: <input className="form-control"
             value={newName}
-            onChange={handleNameChange}
+            onChange={({target})=>setNewName(target.value)}
           />
           number: <input className="form-control" 
             value={newNumber}
-            onChange={handleNumberChange}
+            onChange={({target})=>setNewNumber(target.value)}
           />
         </div>
         <div >
@@ -133,7 +119,11 @@ function App() {
           <table className="table table-striped">
             <tbody>
               {
-                rows
+                personsToShow.map(person =>
+                  <Persons key={person.id} person={person} handleDelete={()=>handleDelete(person.id)}
+
+                  />
+                )
               }
             </tbody>
           </table>
@@ -149,25 +139,25 @@ const Filter=({searchName,filter})=>{
      <div>
           filter shown with: <input className="form-text"
             value={filter}
-            onChange={(e)=>searchName(e)}
+            onChange={searchName}
             placeholder="Search..."/>
         </div>
   )
 }
 
-const Notification = ({ message }) => {
-  if(message === null){
+const Notification = ({ notification }) => {
+  if(notification === null){
     return null
-  }else if(message.includes('was already deleted from server'|| 'was added to phonebook')){
+  }else if(notification.includes('was already deleted from server'|| 'was added to phonebook')){
     return(
       <div className="alert alert-success" role="alert">
-        {message}
+        {notification}
       </div>
     )
   }else{
     return(
       <div className="alert alert-danger" role="alert">
-        {message}
+        {notification}
       </div>
     )
   }

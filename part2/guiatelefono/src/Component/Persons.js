@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Persons = ({ person,handleDelete,updateNumber }) => {
+const Persons = ({ person,handleDelete }) => {
     return (
         <>
             <tr>
@@ -8,9 +8,6 @@ const Persons = ({ person,handleDelete,updateNumber }) => {
                 <td>{person.number}</td>
                 <td>
                     <button className="btn btn-danger" onClick={handleDelete}>Delete</button>
-                </td>
-                <td>
-                    <button className="btn btn-secondary" onClick={updateNumber}>Update</button>
                 </td>
             </tr>
         </>
